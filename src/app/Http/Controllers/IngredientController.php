@@ -40,6 +40,13 @@ class IngredientController extends Controller
 
     public function show(Ingredient $ingredient)
     {
+        $ingredient = Ingredient::find($ingredient);
+
+        if (!$ingredient) {
+            return response()->json([
+                'message' => 'Ingredient not found'
+            ], 404);
+        }
         return response()->json([
             'data' => $ingredient
         ]);
@@ -71,7 +78,7 @@ class IngredientController extends Controller
         while ($ingredient->quantity < $request->count) {
             // Intenta obtener más ingredientes de la API externa
             $success = $this->attemptExternalPurchase($ingredient, $request->count);
-            
+
             if (!$success) {
                 sleep(5); // Esperar 5 segundos antes de reintentar
             }

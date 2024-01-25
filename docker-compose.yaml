@@ -1,0 +1,65 @@
+version: '3.8'
+
+services:
+
+ # web server service
+  storage_nginx:
+    image: nginx:alpine
+    container_name: storage_nginx
+    ports:
+      - "8080:80"
+    volumes:
+      - ./src:/var/www
+      - ./nginx/conf.d/:/etc/nginx/conf.d
+    depends_on:
+      - storage_app
+      - storage_db 
+    networks:
+      - lunch
+
+  # database service
+  storage_db:
+    image: postgres
+    container_name: storage_db
+    volumes:
+      - ./postgresql/data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: Storage
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: root
+    networks:
+      - lunch
+
+  # apllication service
+  storage_app:
+    container_name: storage_app
+    build:
+      context: ./php
+      dockerfile: Dockerfile
+    volumes:
+      - ./src:/var/www
+    ports:
+      - "9000:9000"
+    working_dir: /var/www
+    networks:
+      - lunch
+
+  # pg service
+  storage_pgadmin:
+    image: dpage/pgadmin4
+    container_name: storage_pgadmin
+    ports:
+      - "5050:80"
+    depends_on:
+      - storage_db
+    environment:
+      PGADMIN_DEFAULT_EMAIL: fabiobetancourt7@gmail.com
+      PGADMIN_DEFAULT_PASSWORD: root
+    networks:
+      - lunch
+  
+networks:
+  lunch:
+    external: true
